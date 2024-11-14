@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Event Registration</title>
+  <script src="https://static.line-scdn.net/liff/edge/2.1/sdk.js"></script>
+</head>
+<body>
+  <h2>ลงทะเบียนเข้าร่วมงาน</h2>
+  <form id="registrationForm">
+    ชื่อ-นามสกุล: <input type="text" id="fullName" required><br>
+    ตำแหน่ง: 
+    <select id="position" required>
+      <option value="ศิษยาภิบาล">ศิษยาภิบาล</option>
+      <option value="ทีมผู้นำคริสตจักร">ทีมผู้นำคริสตจักร</option>
+      <option value="อื่นๆ">อื่นๆ โปรดระบุ</option>
+    </select><br>
+    ชื่อคริสตจักร: <input type="text" id="churchName" required><br>
+    สถานที่ตั้งคริสตจักร: <input type="text" id="churchLocation" required><br>
+    อำเภอ: <input type="text" id="district" required><br>
+    จังหวัด: <input type="text" id="province" required><br>
+    เบอร์โทรที่ติดต่อได้สะดวก: <input type="text" id="phoneNumber" required><br>
+    อีเมล (ถ้ามี): <input type="email" id="email"><br>
+    Line ID: <input type="text" id="lineId" required><br>
+    <button type="button" onclick="submitForm()">ยืนยันการสมัคร</button>
+  </form>
+
+  <p id="result"></p>
+
+  <script>
+    // เริ่มต้น LIFF SDK
+    async function initializeLiff() {
+      await liff.init({ liffId: "YOUR_LIFF_ID" });
+      if (!liff.isLoggedIn()) {
+        liff.login();
+      }
+    }
+
+    // ฟังก์ชันส่งข้อมูลไปยัง Google Apps Script
+    async function submitForm() {
+      const data = {
+        fullName: document.getElementById('fullName').value,
+        position: document.getElementById('position').value,
+        churchName: document.getElementById('churchName').value,
+        churchLocation: document.getElementById('churchLocation').value,
+        district: document.getElementById('district').value,
+        province: document.getElementById('province').value,
+        phoneNumber: document.getElementById('phoneNumber').value,
+        email: document.getElementById('email').value,
+        lineId: document.getElementById('lineId').value
+      };
+
+      const response = await fetch('YOUR_GOOGLE_SCRIPT_URL', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+
+      const result = await response.json();
+      if (result.status === 'success') {
+        document.getElementById('result').textContent = 'สมัครสำเร็จ! รหัสการสมัครของคุณคือ: ' + result.registrationCode;
+      } else {
+        document.getElementById('result').textContent = 'เกิดข้อผิดพลาดในการสมัคร กรุณาลองใหม่';
+      }
+    }
+
+    // เรียกใช้ LIFF SDK เมื่อโหลดหน้าเว็บ
+    initializeLiff();
+  </script>
+</body>
+</html>
