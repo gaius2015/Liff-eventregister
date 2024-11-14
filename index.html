@@ -31,14 +31,23 @@
   <script>
     // เริ่มต้น LIFF SDK
     async function initializeLiff() {
-      await liff.init({ liffId: "2006568977-R17d0zLe" });
-      if (!liff.isLoggedIn()) {
-        liff.login();
+      try {
+        await liff.init({ liffId: "2006568977-R17d0zLe" });  // แทนที่ YOUR_LIFF_ID ด้วย LIFF ID จริง
+        if (!liff.isLoggedIn()) {
+          liff.login();
+        } else {
+          alert("LIFF initialized and logged in"); // แจ้งเตือนเมื่อ LIFF เริ่มทำงานและผู้ใช้ล็อกอินแล้ว
+        }
+      } catch (error) {
+        console.error("Error initializing LIFF:", error);
+        alert("เกิดข้อผิดพลาดในการเริ่มต้น LIFF");
       }
     }
 
     // ฟังก์ชันส่งข้อมูลไปยัง Google Apps Script
     async function submitForm() {
+      alert("Submitting form...");  // ตรวจสอบว่าเรียกใช้งานฟังก์ชันนี้
+
       const data = {
         fullName: document.getElementById('fullName').value,
         position: document.getElementById('position').value,
@@ -47,21 +56,30 @@
         district: document.getElementById('district').value,
         province: document.getElementById('province').value,
         phoneNumber: document.getElementById('phoneNumber').value,
-        email: document.getElementById('email').value,
+        email: document.getElementById('email').value || '',
         lineId: document.getElementById('lineId').value
       };
 
-      const response = await fetch('https://script.google.com/macros/s/AKfycbzmepBFh86SQaL_NMKUGzE6fnW3zkTo8I6BdJkK9pFdMbDoFkr07x1w1fQxNMGRZ3ND/exec', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-      });
+      console.log("Data to send:", data);  // แสดงข้อมูลที่กำลังจะส่งออกไป
 
-      const result = await response.json();
-      if (result.status === 'success') {
-        document.getElementById('result').textContent = 'สมัครสำเร็จ! รหัสการสมัครของคุณคือ: ' + result.registrationCode;
-      } else {
-        document.getElementById('result').textContent = 'เกิดข้อผิดพลาดในการสมัคร กรุณาลองใหม่';
+      try {
+        const response = await fetch('https://script.google.com/macros/s/AKfycbzmepBFh86SQaL_NMKUGzE6fnW3zkTo8I6BdJkK9pFdMbDoFkr07x1w1fQxNMGRZ3ND/exec', {  // แทนที่ YOUR_GOOGLE_SCRIPT_URL ด้วย URL ของ Google Apps Script Web App
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+        console.log("Response from Google Apps Script:", result);  // แสดงผลลัพธ์จาก Google Apps Script
+
+        if (result.status === 'success') {
+          document.getElementById('result').textContent = 'สมัครสำเร็จ! รหัสการสมัครของคุณคือ: ' + result.registrationCode;
+        } else {
+          document.getElementById('result').textContent = 'เกิดข้อผิดพลาดในการสมัคร กรุณาลองใหม่';
+        }
+      } catch (error) {
+        console.error("Error submitting form:", error);
+        alert("เกิดข้อผิดพลาดในการส่งข้อมูล กรุณาลองใหม่");
       }
     }
 
